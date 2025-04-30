@@ -89,22 +89,23 @@ function App() {
             setIsTyping(false);
             setMessages((prev) => [
                 ...prev,
-                { sender: "eira", text: data.text || "🔊 Playing audio response..." },
+                { sender: "eira", text: data.text || "🔊 Audio response" },
             ]);
 
-            // Fetch and play the audio
-            const audioResponse = await fetch("http://34.30.206.16:5000/audio");
-            if (!audioResponse.ok) throw new Error("Failed to fetch audio");
-            
-            const audioBlob = await audioResponse.blob();
-            const audioUrl = URL.createObjectURL(audioBlob);
-
-            if (audioRef.current) {
-                audioRef.current.pause();
-                audioRef.current.currentTime = 0;
+            // Handle audio playback from base64 data
+            if (data.audio) {
+                const audioUrl = `data:audio/mpeg;base64,${data.audio}`;
+                
+                if (audioRef.current) {
+                    audioRef.current.pause();
+                    audioRef.current.currentTime = 0;
+                }
+                
+                audioRef.current = new Audio(audioUrl);
+                audioRef.current.play().catch(error => {
+                    console.error("Audio playback failed:", error);
+                });
             }
-            audioRef.current = new Audio(audioUrl);
-            audioRef.current.play();
 
         } catch (error) {
             console.error("Error:", error);
